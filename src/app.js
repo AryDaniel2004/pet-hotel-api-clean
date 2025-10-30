@@ -19,11 +19,11 @@ import adminRoutes from "./routes/admin.routes.js";
 const app = express();
 
 // =============================
-// 🧠 Configuración CORS global
+// 🌐 Configuración CORS global
 // =============================
 const allowedOrigins = [
-  "https://huellas-relax-frontend.onrender.com", // 🌐 Frontend en Render
-  "http://localhost:3000", // 💻 Frontend local
+  "https://huellas-relax-frontend.onrender.com", // 🌍 Frontend Render
+  "http://localhost:3000", // 💻 Local
 ];
 
 app.use(
@@ -35,7 +35,7 @@ app.use(
         callback(new Error("CORS bloqueado para este origen: " + origin));
       }
     },
-    credentials: true, // ✅ Permitir cookies / Authorization headers
+    credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
@@ -46,8 +46,6 @@ app.use(
 // =============================
 app.use(helmet());
 app.use(morgan("dev"));
-
-// ⚡ Muy importante: JSON parser ANTES de las rutas
 app.use(
   express.json({
     verify: (req, res, buf) => {
