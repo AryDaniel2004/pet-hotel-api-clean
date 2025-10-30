@@ -4,14 +4,17 @@ import express from "express";
 import app from "./app.js";
 import listEndpoints from "express-list-endpoints";
 
-
 const PORT = process.env.PORT || 3001;
+const HOST = "0.0.0.0"; // 🔥 Necesario para Render
 
-// ✅ Servir archivos estáticos
+// Servir archivos estáticos
 app.use("/uploads", express.static("uploads"));
 
+// Mostrar rutas disponibles en consola
 console.table(listEndpoints(app));
 
-app.listen(PORT, () => {
-  console.log(`[api] http://localhost:${PORT}`);
+// Iniciar servidor
+app.listen(PORT, HOST, () => {
+  console.log(`[api] Servidor escuchando en puerto ${PORT}`);
+  console.log(`[api] Entorno: ${process.env.NODE_ENV}`);
 });
