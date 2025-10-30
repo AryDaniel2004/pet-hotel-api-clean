@@ -1,0 +1,608 @@
+openapi: 3.0.3
+info:
+  title: Pet Hotel API
+  version: 1.0.0
+  description: Backend para reservas de hotel de mascotas (Auth, Users, Clients, Pets, Inventory, Bookings, Payments).
+servers:
+  - url: http://localhost:3000
+    description: Local
+
+tags:
+  - name: Health
+  - name: Auth
+  - name: Users
+  - name: Clients
+  - name: Pets
+  - name: Services
+  - name: Inventory
+  - name: Bookings
+  - name: Payments
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Tokens:
+      type: object
+      properties:
+        accessToken: { type: string }
+        refreshToken: { type: string }
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string }
+    RefreshRequest:
+      type: object
+      required: [refreshToken]
+      properties:
+        refreshToken: { type: string }
+    RegisterRequest:
+      type: object
+      required: [full_name, dpi, phone, email, password]
+      properties:
+        full_name: { type: string }
+        dpi: { type: string }
+        phone: { type: string }
+        email: { type: string, format: email }
+        password: { type: string }
+        address: { type: string, nullable: true }
+    User:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        full_name: { type: string }
+        dpi: { type: string }
+        phone: { type: string }
+        email: { type: string }
+        role: { type: string, enum: [ADMIN, CUSTOMER] }
+        is_active: { type: boolean, nullable: true }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+    Client:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        user_id: { type: string, format: uuid }
+        full_name: { type: string }
+        phone: { type: string, nullable: true }
+        address: { type: string, nullable: true }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+    Pet:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        owner_user_id: { type: string, format: uuid }
+        name: { type: string }
+        species: { type: string, enum: [DOG, CAT, OTHER] }
+        breed: { type: string, nullable: true }
+        weight_kg: { type: number }
+        photo_url: { type: string, nullable: true }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+    Service:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        description: { type: string, nullable: true }
+        price_type: { type: string, enum: [FIXED, PER_NIGHT] }
+        price: { type: number }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+    BookingItemService:
+      type: object
+      properties:
+        service_id: { type: string, format: uuid }
+        qty: { type: integer }
+        unit_price: { type: number }
+    BookingItem:
+      type: object
+      properties:
+        room_id: { type: string, format: uuid }
+        pet_id:  { type: string, format: uuid }
+        nightly_rate: { type: number }
+        notes: { type: string, nullable: true }
+        services:
+          type: array
+          items: { $ref: '#/components/schemas/BookingItemService' }
+    CreateBookingRequest:
+      type: object
+      required: [customer_user_id, start_date, end_date, items]
+      properties:
+        customer_user_id: { type: string, format: uuid }
+        start_date: { type: string, format: date }
+        end_date: { type: string, format: date }
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/BookingItem' }
+    Booking:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        customer_user_id: { type: string, format: uuid }
+        start_date: { type: string, format: date }
+        end_date: { type: string, format: date }
+        status: { type: string, enum: [PENDING, CONFIRMED, CANCELLED] }
+        subtotal: { type: number }
+        taxes: { type: number }
+        total: { type: number }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+    AvailabilityResponse:
+      type: object
+      properties:
+        available_rooms:
+          type: array
+          items:
+            type: object
+            properties:
+              room_id: { type: string, format: uuid }
+              code: { type: string }
+              room_type_id: { type: string, format: uuid }
+    CreateBlockRequest:
+      type: object
+      required: [start, end, reason]
+      properties:
+        start: { type: string, format: date-time }
+        end:   { type: string, format: date-time }
+        reason:{ type: string }
+    UpdateBookingStatusRequest:
+      type: object
+      required: [status]
+      properties:
+        status: { type: string, enum: [PENDING, CONFIRMED, CANCELLED] }
+    PaymentCheckoutRequest:
+      type: object
+      required: [booking_id]
+      properties:
+        booking_id: { type: string, format: uuid }
+    PaymentCheckoutResponse:
+      type: object
+      properties:
+        checkoutUrl: { type: string }
+        session_id:  { type: string }
+        payment_id:  { type: string, format: uuid }
+
+paths:
+  /v1/health:
+    get:
+      tags: [Health]
+      summary: Ping
+      responses:
+        '200':
+          description: ok
+
+  /v1/auth/login:
+    post:
+      tags: [Auth]
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LoginRequest' }
+      responses:
+        '200':
+          description: Tokens
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Tokens' }
+
+  /v1/auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Refresh token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RefreshRequest' }
+      responses:
+        '200':
+          description: Tokens
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Tokens' }
+
+  /v1/auth/register:
+    post:
+      tags: [Auth]
+      summary: Registro público (crea USER y opcional CLIENT)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RegisterRequest' }
+      responses:
+        '201':
+          description: Tokens + user
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accessToken: { type: string }
+                  refreshToken:{ type: string }
+                  user: { $ref: '#/components/schemas/User' }
+
+  /v1/users/:
+    get:
+      tags: [Users]
+      security: [ { bearerAuth: [] } ]
+      summary: Listar usuarios (ADMIN)
+      responses:
+        '200':
+          description: Lista de usuarios
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/User' }
+    post:
+      tags: [Users]
+      security: [ { bearerAuth: [] } ]
+      summary: Crear usuario (ADMIN)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/User' }
+      responses:
+        '201': { description: Creado }
+
+  /v1/users/{id}:
+    get:
+      tags: [Users]
+      security: [ { bearerAuth: [] } ]
+      summary: Detalle usuario
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Usuario
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
+    put:
+      tags: [Users]
+      security: [ { bearerAuth: [] } ]
+      summary: Actualizar usuario
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/User' }
+      responses:
+        '200': { description: OK }
+    delete:
+      tags: [Users]
+      security: [ { bearerAuth: [] } ]
+      summary: Eliminar (lógico si aplica)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200': { description: OK }
+
+  /v1/clients:
+    get:
+      tags: [Clients]
+      security: [ { bearerAuth: [] } ]
+      summary: Listar clientes (q, limit opcional)
+      parameters:
+        - in: query
+          name: q
+          schema: { type: string }
+        - in: query
+          name: limit
+          schema: { type: integer, default: 20 }
+      responses:
+        '200':
+          description: Lista
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Client' }
+    post:
+      tags: [Clients]
+      security: [ { bearerAuth: [] } ]
+      summary: Crear cliente
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Client' }
+      responses:
+        '201': { description: Creado }
+
+  /v1/clients/{id}:
+    get:
+      tags: [Clients]
+      security: [ { bearerAuth: [] } ]
+      summary: Detalle cliente
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Cliente
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Client' }
+    put:
+      tags: [Clients]
+      security: [ { bearerAuth: [] } ]
+      summary: Actualiza cliente
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Client' }
+      responses:
+        '200': { description: OK }
+    delete:
+      tags: [Clients]
+      security: [ { bearerAuth: [] } ]
+      summary: Eliminar cliente
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200': { description: OK }
+
+  /v1/pets:
+    get:
+      tags: [Pets]
+      security: [ { bearerAuth: [] } ]
+      summary: Listar mascotas (owner_user_id opcional)
+      parameters:
+        - in: query
+          name: owner_user_id
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Lista
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Pet' }
+    post:
+      tags: [Pets]
+      security: [ { bearerAuth: [] } ]
+      summary: Crear mascota
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Pet' }
+      responses:
+        '201': { description: Creado }
+
+  /v1/pets/{id}:
+    get:
+      tags: [Pets]
+      security: [ { bearerAuth: [] } ]
+      summary: Detalle mascota
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Mascota
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Pet' }
+    put:
+      tags: [Pets]
+      security: [ { bearerAuth: [] } ]
+      summary: Actualiza mascota
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Pet' }
+      responses:
+        '200': { description: OK }
+    delete:
+      tags: [Pets]
+      security: [ { bearerAuth: [] } ]
+      summary: Eliminar mascota
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200': { description: OK }
+
+  /v1/rooms/availability:
+    get:
+      tags: [Inventory]
+      security: [ { bearerAuth: [] } ]
+      summary: Chequear disponibilidad por rango
+      parameters:
+        - in: query
+          name: start
+          required: true
+          schema: { type: string, format: date }
+        - in: query
+          name: end
+          required: true
+          schema: { type: string, format: date }
+      responses:
+        '200':
+          description: Lista de rooms disponibles
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AvailabilityResponse' }
+
+  /v1/rooms/{id}/blocks:
+    get:
+      tags: [Inventory]
+      security: [ { bearerAuth: [] } ]
+      summary: Listar bloqueos de un cuarto
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200': { description: OK }
+    post:
+      tags: [Inventory]
+      security: [ { bearerAuth: [] } ]
+      summary: Crear bloqueo
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateBlockRequest' }
+      responses:
+        '201': { description: Creado }
+
+  /v1/room-blocks/{blockId}:
+    delete:
+      tags: [Inventory]
+      security: [ { bearerAuth: [] } ]
+      summary: Eliminar bloqueo
+      parameters:
+        - in: path
+          name: blockId
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200': { description: OK }
+
+  /v1/bookings:
+    get:
+      tags: [Bookings]
+      security: [ { bearerAuth: [] } ]
+      summary: Listar reservas
+      parameters:
+        - in: query
+          name: from
+          schema: { type: string, format: date }
+        - in: query
+          name: to
+          schema: { type: string, format: date }
+      responses:
+        '200':
+          description: Lista
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Booking' }
+    post:
+      tags: [Bookings]
+      security: [ { bearerAuth: [] } ]
+      summary: Crear reserva
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateBookingRequest' }
+      responses:
+        '201':
+          description: Creada
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Booking' }
+
+  /v1/bookings/{id}:
+    get:
+      tags: [Bookings]
+      security: [ { bearerAuth: [] } ]
+      summary: Detalle reserva con items & services
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Detalle
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Booking' }
+
+  /v1/bookings/{id}/status:
+    patch:
+      tags: [Bookings]
+      security: [ { bearerAuth: [] } ]
+      summary: Cambiar estado reserva
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdateBookingStatusRequest' }
+      responses:
+        '200': { description: OK }
+
+  /v1/payments/checkout:
+    post:
+      tags: [Payments]
+      summary: Inicia pago en Stripe Checkout
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PaymentCheckoutRequest' }
+      responses:
+        '200':
+          description: URL de checkout
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PaymentCheckoutResponse' }
+
+  /v1/payments/webhook:
+    post:
+      tags: [Payments]
+      summary: Webhook de Stripe (usa raw body)
+      responses:
+        '200': { description: OK }

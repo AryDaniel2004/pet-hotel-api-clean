@@ -1,0 +1,45 @@
+{
+  "name": "pet-hotel-api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon --watch src --ext js --exec node src/server.js",
+    "start": "node src/server.js",
+    "db:auth:migrate": "sequelize-cli --config sequelize/auth/config.js db:migrate",
+    "db:pets:migrate": "sequelize-cli --config sequelize/pets/config.js db:migrate",
+    "db:inv:migrate": "sequelize-cli --config sequelize/inv/config.js db:migrate",
+    "db:book:migrate": "sequelize-cli --config sequelize/book/config.js db:migrate",
+    "db:auth:seed": "sequelize-cli --config sequelize/auth/config.js db:seed:all",
+    "db:pets:seed": "sequelize-cli --config sequelize/pets/config.js db:seed:all",
+    "db:inv:seed": "sequelize-cli --config sequelize/inv/config.js db:seed:all",
+    "db:book:seed": "sequelize-cli --config sequelize/book/config.js db:seed:all",
+    "routes": "node tools/listRoutes.js"
+  },
+  "dependencies": {
+    "@scalar/express-api-reference": "^0.8.20",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dayjs": "^1.11.13",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-validator": "^7.0.1",
+    "fs": "^0.0.1-security",
+    "helmet": "^7.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0",
+    "multer": "^2.0.2",
+    "path": "^0.12.7",
+    "pdfkit": "^0.17.2",
+    "pg": "^8.11.5",
+    "sequelize": "^6.37.3",
+    "stripe": "^18.5.0",
+    "swagger-ui-express": "^5.0.1",
+    "yamljs": "^0.3.0"
+  },
+  "devDependencies": {
+    "express-list-endpoints": "^7.1.1",
+    "nodemon": "^3.1.4",
+    "sequelize-cli": "^6.6.2"
+  }
+}
