@@ -6,9 +6,7 @@ import { QueryTypes } from "sequelize";
 
 const router = Router();
 
-/* ===========================
-   ✅ Listado de habitaciones
-=========================== */
+
 router.get("/", requireAuth, async (_req, res) => {
   try {
     const rooms = await Room.findAll({
@@ -36,17 +34,14 @@ router.get("/", requireAuth, async (_req, res) => {
   }
 });
 
-/* ===========================
-   ✅ Disponibilidad (fechas bloqueadas)
-   Corrige el origen de room_id (viene desde booking_items)
-=========================== */
+
 router.get("/availability", requireAuth, async (req, res) => {
   try {
     const { room_id } = req.query;
     if (!room_id)
       return res.status(400).json({ error: "room_id es requerido" });
 
-    // Consulta usando JOIN a booking_items para obtener reservas confirmadas
+   
     const data = await db.book.query(
       `
       SELECT b.start_date, b.end_date
