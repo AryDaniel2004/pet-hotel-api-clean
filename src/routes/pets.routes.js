@@ -11,11 +11,11 @@ import {
   deletePet,
 } from "../controllers/pets.controller.js";
 import { requireAuth, requireRoles } from "../middlewares/authz.js";
-import { Pet } from "../lib/databases.js"; // 👈 para actualizar photo_url
+import { Pet } from "../lib/databases.js"; 
 
 const router = Router();
 
-// ================= VALIDADOR =================
+
 const validate = (rules) => [
   ...rules,
   (req, res, next) => {
@@ -28,10 +28,8 @@ const validate = (rules) => [
 
 // ================= RUTAS CRUD =================
 
-// ✅ Listar solo las mascotas del usuario autenticado
 router.get("/my", requireAuth, requireRoles("ADMIN", "CUSTOMER"), listMyPets);
 
-// ✅ Crear mascota asociada al usuario autenticado
 router.post(
   "/",
   requireAuth,
@@ -46,7 +44,7 @@ router.post(
   createPet
 );
 
-// ✅ Obtener mascota específica
+
 router.get(
   "/:id",
   requireAuth,
@@ -55,7 +53,7 @@ router.get(
   getPet
 );
 
-// ✅ Actualizar mascota
+
 router.put(
   "/:id",
   requireAuth,
@@ -71,7 +69,7 @@ router.put(
   updatePet
 );
 
-// ✅ Eliminar mascota
+
 router.delete(
   "/:id",
   requireAuth,
@@ -80,11 +78,9 @@ router.delete(
   deletePet
 );
 
-// ================= SUBIDA DE FOTOS =================
-
-// 📦 Configuración de almacenamiento con Multer
+// FOTOS 
 const storage = multer.diskStorage({
-  destination: "uploads/pets/", // carpeta donde se guardan las fotos
+  destination: "uploads/pets/", 
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
     cb(null, uniqueSuffix + path.extname(file.originalname));
@@ -93,7 +89,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// ✅ Subir foto y actualizar el registro de la mascota
+
 router.post(
   "/upload-photo",
   requireAuth,
@@ -116,7 +112,7 @@ router.post(
 
       res.json({ success: true, url: photoUrl });
     } catch (err) {
-      console.error("❌ Error al subir foto:", err);
+      console.error(" Error al subir foto:", err);
       res.status(500).json({ error: "Error interno al subir la foto" });
     }
   }
