@@ -5,9 +5,9 @@ import { QueryTypes } from "sequelize";
 
 const router = Router();
 
-/* ===========================================================
-   🔹 Crear un nuevo servicio (bookingsdb.services)
-=========================================================== */
+/* 
+    Crear un nuevo servicio (bookingsdb.services)
+ */
 router.post("/services", requireAuth, requireRoles("ADMIN"), async (req, res) => {
   try {
     const { name, description, price } = req.body || {};
@@ -35,9 +35,9 @@ router.post("/services", requireAuth, requireRoles("ADMIN"), async (req, res) =>
   }
 });
 
-/* ===========================================================
-   🔹 Actualizar precio de servicio existente
-=========================================================== */
+/* 
+    Actualizar precio de servicio existente
+ */
 router.patch(
   "/services/:id",
   requireAuth,
@@ -68,9 +68,9 @@ router.patch(
   }
 );
 
-/* ===========================================================
-   🔹 Actualizar precio de habitación (inventorydb.rooms)
-=========================================================== */
+/* 
+    Actualizar precio de habitación (inventorydb.rooms)
+ */
 router.patch(
   "/rooms/:id/price",
   requireAuth,
