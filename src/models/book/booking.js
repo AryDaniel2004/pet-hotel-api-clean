@@ -38,7 +38,7 @@ export default (sequelize) => {
         defaultValue: 0,
       },
       total: {
-        type: DataTypes.DECIMAL(10, 2), // 👈 ya está en la tabla, solo lo hacemos coincidir
+        type: DataTypes.DECIMAL(10, 2), 
         allowNull: false,
         defaultValue: 0,
       },
