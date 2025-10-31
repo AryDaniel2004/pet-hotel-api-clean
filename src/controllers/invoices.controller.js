@@ -5,7 +5,7 @@ import fs from "fs";
 import path from "path";
 
 /**
- * ✅ Crea una factura desde una reserva ya pagada (CONFIRMED)
+ * 
  * Body: { booking_id, nit? }
  */
 export const createInvoiceFromBooking = async (req, res) => {
@@ -15,7 +15,7 @@ export const createInvoiceFromBooking = async (req, res) => {
     if (!booking_id)
       return res.status(400).json({ error: "booking_id required" });
 
-    // 1️⃣ Obtener datos de la reserva y usuario
+   
     const [booking] = await db.book.query(
       `
       SELECT b.id, b.customer_user_id, b.start_date, b.end_date,
@@ -49,7 +49,7 @@ export const createInvoiceFromBooking = async (req, res) => {
         .json({ error: "Booking is not confirmed or paid" });
     }
 
-    // 2️⃣ Buscar el último pago (por referencia)
+    // Buscar el último pago (por referencia)
     const [pay] = await db.book.query(
       `
       SELECT id, status, provider_ref
@@ -65,7 +65,7 @@ export const createInvoiceFromBooking = async (req, res) => {
       }
     );
 
-    // 3️⃣ Crear encabezado de factura
+    // Factura (Ya no lo voy aplicar)
     const [inv] = await db.book.query(
       `
       INSERT INTO invoices
@@ -92,7 +92,7 @@ export const createInvoiceFromBooking = async (req, res) => {
 
     const invoice_id = inv?.id || inv?.[0]?.id || inv;
 
-    // 4️⃣ Insertar items
+    //  Insertar items
     await db.book.query(
       `
       INSERT INTO invoice_items (id, invoice_id, description, qty, unit_price, total, created_at, updated_at)
@@ -125,7 +125,7 @@ export const createInvoiceFromBooking = async (req, res) => {
 };
 
 /**
- * ✅ Genera el PDF de la factura por ID
+ *  Generacion de Facturas para PDFS (NO SE VA INTREGRAR)
  */
 export const getInvoice = async (req, res) => {
   try {
@@ -158,7 +158,7 @@ export const getInvoice = async (req, res) => {
     const doc = new PDFDocument({ margin: 50 });
     doc.pipe(res);
 
-    // === Logo y encabezado ===
+    //  Logo y encabezado 
     const logoPath = path.resolve("assets/logo.png");
     if (fs.existsSync(logoPath)) doc.image(logoPath, 50, 45, { width: 80 });
 
@@ -170,7 +170,7 @@ export const getInvoice = async (req, res) => {
       .text("www.huellasrelax.com", 140, 85)
       .moveDown(2);
 
-    // === Datos del cliente ===
+    //  Datos del cliente 
     doc
       .fontSize(12)
       .text(`Factura No: ${invoice.id}`)
@@ -179,7 +179,7 @@ export const getInvoice = async (req, res) => {
       .text(`NIT: ${invoice.nit}`)
       .moveDown(1);
 
-    // === Detalle ===
+    // DetalleS 
     doc
       .fontSize(14)
       .text("Detalle de la reserva", { underline: true })
@@ -208,9 +208,7 @@ export const getInvoice = async (req, res) => {
   }
 };
 
-/**
- * ✅ Lista todas las facturas o por booking_id
- */
+
 export const listInvoices = async (req, res) => {
   try {
     const { booking_id } = req.query;
