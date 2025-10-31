@@ -5,11 +5,7 @@ import { db } from "../lib/databases.js";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET);
 
-/**
- * Crear PaymentIntent desde booking existente.
- * Body: { booking_id }
- * Retorna: { payment_id, client_secret, amount, currency }
- */
+
 export const createPaymentIntent = async (req, res) => {
   try {
     const { booking_id } = req.body || {};
@@ -75,9 +71,7 @@ export const createPaymentIntent = async (req, res) => {
   }
 };
 
-/**
- * Confirmación de prueba
- */
+
 export const confirmIntentTest = async (req, res) => {
   try {
     if (process.env.NODE_ENV !== "development")
