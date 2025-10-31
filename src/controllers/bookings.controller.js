@@ -6,7 +6,7 @@ export const createBooking = async (req, res) => {
   try {
     const user_id = req.user?.id; 
     if (!user_id) {
-      console.error("❌ [POST /bookings] Usuario sin ID en req.user:", req.user);
+      console.error(" [POST /bookings] Usuario sin ID en req.user:", req.user);
       return res.status(401).json({ error: "Unauthorized" });
     }
 
@@ -30,7 +30,7 @@ export const createBooking = async (req, res) => {
       updated_at: new Date(),
     });
 
-    console.log("✅ Booking creado:", booking.id);
+    console.log(" Booking creado:", booking.id);
 
     // 🔹 Crear BookingItem (habitación + mascota)
     const item = await BookingItem.create({
@@ -42,7 +42,7 @@ export const createBooking = async (req, res) => {
       updated_at: new Date(),
     });
 
-    console.log("✅ BookingItem creado:", item.id);
+    console.log(" BookingItem creado:", item.id);
 
   
     for (const sid of services) {
@@ -55,11 +55,11 @@ export const createBooking = async (req, res) => {
       });
     }
 
-    console.log("✅ Servicios asociados creados:", services.length);
+    console.log(" Servicios asociados creados:", services.length);
 
     return res.status(201).json({ ok: true, booking_id: booking.id });
   } catch (err) {
-    console.error("❌ [POST /bookings] Error interno:", err);
+    console.error(" [POST /bookings] Error interno:", err);
     return res.status(500).json({ error: "Failed to create booking", details: err.message });
   }
 };
@@ -71,11 +71,11 @@ export const listMyBookings = async (req, res) => {
   try {
     const user_id = req.user?.id;
     if (!user_id) {
-      console.error("❌ [GET /bookings/my] Usuario sin ID:", req.user);
+      console.error(" [GET /bookings/my] Usuario sin ID:", req.user);
       return res.status(401).json({ error: "Unauthorized" });
     }
 
-    console.log("🟢 [GET /bookings/my] Listando reservas para usuario:", user_id);
+    console.log(" [GET /bookings/my] Listando reservas para usuario:", user_id);
 
     const rows = await Booking.findAll({
       where: { customer_user_id: user_id }, 
@@ -92,10 +92,10 @@ export const listMyBookings = async (req, res) => {
       order: [["created_at", "DESC"]],
     });
 
-    console.log(`✅ Se encontraron ${rows.length} reservas`);
+    console.log(` Se encontraron ${rows.length} reservas`);
     return res.json(rows);
   } catch (err) {
-    console.error("❌ [GET /bookings/my] Error interno:", err);
+    console.error(" [GET /bookings/my] Error interno:", err);
     return res.status(500).json({
       error: "Failed to list bookings",
       details: err.message,
