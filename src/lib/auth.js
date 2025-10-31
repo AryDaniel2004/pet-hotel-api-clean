@@ -14,9 +14,9 @@ export const comparePassword = async (plain, hash) => bcrypt.compare(plain, hash
 export const verifyPassword = comparePassword;
 
 export const signAccess = (user = {}) => {
-  // Asegura que el token tenga sub (id) y role
+  // Asegura que el token tenga sub (id) y rol
   const payload = {
-    sub: user.sub || user.id,        // <- campo estándar JWT
+    sub: user.sub || user.id,        
     role: user.role || "CUSTOMER",
   };
   return jwt.sign(payload, ACCESS_SECRET, {
