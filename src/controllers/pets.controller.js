@@ -2,11 +2,11 @@
 import { Op } from "sequelize";
 import { Pet } from "../lib/databases.js";
 
-// 🐾 Crear una mascota asociada al usuario autenticado
+// Crear la mascota 
 export const createPet = async (req, res) => {
   try {
     const { name, species, breed, weight_kg, photo_url } = req.body || {};
-    const owner_user_id = req.user?.id; // ✅ Corregido (antes era sub)
+    const owner_user_id = req.user?.id; 
 
     if (!owner_user_id) {
       return res.status(401).json({ error: "unauthorized" });
@@ -30,10 +30,10 @@ export const createPet = async (req, res) => {
   }
 };
 
-// 🐾 Listar solo las mascotas del usuario autenticado
+// Lista Mascotas solo del Usuario que inicio sesion
 export const listMyPets = async (req, res) => {
   try {
-    const owner_user_id = req.user?.id; // ✅ corregido
+    const owner_user_id = req.user?.id; 
     if (!owner_user_id) return res.status(401).json({ error: "unauthorized" });
 
     const rows = await Pet.findAll({
@@ -48,10 +48,10 @@ export const listMyPets = async (req, res) => {
   }
 };
 
-// 🐾 Obtener una mascota específica del usuario
+// Get de las mascotas que tiene el usuario
 export const getPet = async (req, res) => {
   try {
-    const owner_user_id = req.user?.id; // ✅ corregido
+    const owner_user_id = req.user?.id; 
     const pet = await Pet.findByPk(req.params.id);
 
     if (!pet || pet.owner_user_id !== owner_user_id) {
@@ -65,10 +65,10 @@ export const getPet = async (req, res) => {
   }
 };
 
-// 🐾 Actualizar una mascota del usuario
+// Actulizacion de las mascotas 
 export const updatePet = async (req, res) => {
   try {
-    const owner_user_id = req.user?.id; // ✅ corregido
+    const owner_user_id = req.user?.id; 
     const pet = await Pet.findByPk(req.params.id);
 
     if (!pet || pet.owner_user_id !== owner_user_id) {
@@ -92,10 +92,10 @@ export const updatePet = async (req, res) => {
   }
 };
 
-// 🐾 Eliminar mascota del usuario
+// Eliminar a una de las mascotas 
 export const deletePet = async (req, res) => {
   try {
-    const owner_user_id = req.user?.id; // ✅ corregido
+    const owner_user_id = req.user?.id; 
     const pet = await Pet.findByPk(req.params.id);
 
     if (!pet || pet.owner_user_id !== owner_user_id) {
