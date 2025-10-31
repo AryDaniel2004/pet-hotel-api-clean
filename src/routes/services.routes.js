@@ -5,7 +5,7 @@ import { Service } from "../lib/databases.js";
 
 const router = Router();
 
-// ✅ GET /v1/services — lista los servicios disponibles
+
 router.get("/", requireAuth, async (_req, res) => {
   try {
     const rows = await Service.findAll({ order: [["created_at", "ASC"]] });
