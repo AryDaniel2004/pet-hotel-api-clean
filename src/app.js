@@ -18,12 +18,9 @@ import adminRoutes from "./routes/admin.routes.js";
 
 const app = express();
 
-// =============================
-// 🌐 Configuración CORS global
-// =============================
 const allowedOrigins = [
-  "https://huellas-relax-frontend.onrender.com", // 🌍 Frontend Render
-  "http://localhost:3000", // 💻 Local
+  "https://huellas-relax-frontend.onrender.com", 
+  "http://localhost:3000", 
 ];
 
 app.use(
@@ -41,15 +38,12 @@ app.use(
   })
 );
 
-// =============================
-// 🧰 Middlewares globales
-// =============================
 app.use(helmet());
 app.use(morgan("dev"));
 app.use(
   express.json({
     verify: (req, res, buf) => {
-      // Solo el webhook de Stripe necesita rawBody
+      
       if (req.originalUrl === "/v1/payments/webhook") {
         req.rawBody = buf.toString();
       }
@@ -57,9 +51,6 @@ app.use(
   })
 );
 
-// =============================
-// 🩺 Ruta de salud
-// =============================
 app.get("/v1/health", (_req, res) =>
   res.json({
     ok: true,
@@ -68,9 +59,7 @@ app.get("/v1/health", (_req, res) =>
   })
 );
 
-// =============================
-// 🧩 Rutas principales
-// =============================
+// rutas P 
 app.use("/v1/auth", authRoutes);
 app.use("/v1/users", usersRoutes);
 app.use("/v1/clients", clientsRoutes);
