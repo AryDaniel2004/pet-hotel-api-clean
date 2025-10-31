@@ -1,8 +1,8 @@
 import { verifyAccess } from "../lib/auth.js";
 
-/* ======================================================
-   🔐 Autenticación: valida el token JWT y agrega req.user
-====================================================== */
+/* 
+    valida el token JWT
+*/
 export function requireAuth(req, res, next) {
   const hdr = req.headers.authorization || "";
   const token = hdr.startsWith("Bearer ") ? hdr.slice(7) : null;
@@ -14,7 +14,7 @@ export function requireAuth(req, res, next) {
   try {
     const payload = verifyAccess(token);
 
-    // Normalizamos las posibles claves
+    // Normalizamos 
     const userId = payload?.id || payload?.sub || payload?.user_id;
     if (!userId) {
       console.error("❌ [requireAuth] Token válido pero sin ID:", payload);
@@ -35,11 +35,9 @@ export function requireAuth(req, res, next) {
   }
 }
 
-/* ======================================================
-   🧩 Autorización: valida si el rol del usuario está permitido
-====================================================== */
+
 export function requireRoles(allowedRoles = ["ADMIN"]) {
-  // Acepta tanto requireRoles("ADMIN", "CUSTOMER") como requireRoles(["ADMIN", "CUSTOMER"])
+ 
   const rolesArray = Array.isArray(allowedRoles)
     ? allowedRoles
     : Array.from(arguments);
@@ -52,7 +50,7 @@ export function requireRoles(allowedRoles = ["ADMIN"]) {
     const userRole = req.user.role;
     if (!rolesArray.includes(userRole)) {
       console.warn(
-        `🚫 [requireRoles] Acceso denegado — Rol actual: ${userRole}, Roles permitidos: ${rolesArray.join(", ")}`
+        ` [requireRoles] Acceso denegado — Rol actual: ${userRole}, Roles permitidos: ${rolesArray.join(", ")}`
       );
       return res.status(403).json({ error: "forbidden" });
     }
