@@ -9,7 +9,7 @@ import { QueryTypes, Sequelize } from "sequelize";
 
 const router = Router();
 
-// ✅ Middleware de validación reutilizable
+
 const validate = (rules) => [
   ...rules,
   (req, res, next) => {
@@ -21,9 +21,7 @@ const validate = (rules) => [
   },
 ];
 
-/* =========================
-   ✅ Crear reserva
-========================= */
+
 router.post(
   "/",
   requireAuth,
@@ -42,7 +40,7 @@ router.post(
 
       if (!user_id) return res.status(401).json({ error: "Unauthorized" });
 
-      // 1️⃣ Precio base de la habitación
+      
       const [roomResult] = await db.inv.query(
         `SELECT rt.base_rate AS price
          FROM rooms r
@@ -53,7 +51,7 @@ router.post(
 
       const roomPrice = Number(roomResult?.price) || 0;
 
-      // 2️⃣ Servicios seleccionados
+      
       let servicesTotal = 0;
       let serviceDetails = [];
 
@@ -71,10 +69,10 @@ router.post(
         servicesTotal = serviceDetails.reduce((sum, s) => sum + s.price, 0);
       }
 
-      // 3️⃣ Calcular total
+      
       const total = roomPrice + servicesTotal;
 
-      // 4️⃣ Crear reserva principal
+      
       const booking = await Booking.create(
         {
           id: uuidv4(),
@@ -90,7 +88,7 @@ router.post(
         { transaction: t }
       );
 
-      // 5️⃣ Crear BookingItem (habitaciones / mascota)
+      
       const item = await BookingItem.create(
         {
           id: uuidv4(),
@@ -105,7 +103,7 @@ router.post(
         { transaction: t }
       );
 
-      // 6️⃣ Crear servicios adicionales
+     
       if (serviceDetails.length > 0) {
         const serviceEntries = serviceDetails.map((s) => ({
           id: uuidv4(),
@@ -121,11 +119,11 @@ router.post(
       }
 
       await t.commit();
-      console.log(`✅ Reserva creada ${booking.id} — Total: Q${total}`);
+      console.log(` Reserva creada ${booking.id} — Total: Q${total}`);
       return res.status(201).json({ ok: true, booking_id: booking.id, total });
     } catch (err) {
       await t.rollback();
-      console.error("❌ [POST /bookings] Error interno:", err);
+      console.error(" [POST /bookings] Error interno:", err);
       return res.status(500).json({
         error: "Failed to create booking",
         details: err.message,
@@ -134,9 +132,7 @@ router.post(
   }
 );
 
-/* =========================
-   ✅ Listar reservas del usuario
-========================= */
+
 router.get("/my", requireAuth, async (req, res) => {
   try {
     const userId = req.user?.id;
@@ -185,7 +181,7 @@ router.get("/my", requireAuth, async (req, res) => {
       const it = items.find(i => i.booking_id === b.booking_id);
       const room = rooms.find(r => r.id === it?.room_id);
       return {
-        id: b.booking_id, // 👈 ID real que debe usar el frontend
+        id: b.booking_id, 
         start_date: b.start_date,
         end_date: b.end_date,
         status: b.status,
@@ -198,14 +194,12 @@ router.get("/my", requireAuth, async (req, res) => {
 
     res.json(result);
   } catch (err) {
-    console.error("❌ [GET /bookings/my]", err);
+    console.error(" [GET /bookings/my]", err);
     res.status(500).json({ error: "Failed to list bookings" });
   }
 });
 
-/* =========================
-   ✅ Actualizar estado (PATCH)
-========================= */
+
 router.patch(
   "/:id/status",
   requireAuth,
@@ -224,18 +218,16 @@ router.patch(
       booking.status = status;
       await booking.save();
 
-      console.log(`✅ Estado de reserva ${id} cambiado a ${status}`);
+      console.log(` Estado de reserva ${id} cambiado a ${status}`);
       return res.json({ ok: true, id, status });
     } catch (err) {
-      console.error("❌ [PATCH /bookings/:id/status]", err);
+      console.error(" [PATCH /bookings/:id/status]", err);
       return res.status(500).json({ error: "Failed to update status" });
     }
   }
 );
 
-/* =========================
-   ✅ Eliminar reserva
-========================= */
+
 router.delete("/:id", requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
@@ -262,10 +254,10 @@ router.delete("/:id", requireAuth, async (req, res) => {
     await BookingItem.destroy({ where: { booking_id: id } });
     await Booking.destroy({ where: { id } });
 
-    console.log("✅ Reserva eliminada correctamente:", id);
+    console.log(" Reserva eliminada correctamente:", id);
     return res.status(200).json({ ok: true });
   } catch (err) {
-    console.error("❌ [DELETE /bookings/:id]", err);
+    console.error(" [DELETE /bookings/:id]", err);
     return res.status(500).json({
       error: "Failed to delete booking",
       details: err.message,
