@@ -1,12 +1,10 @@
 import { Booking, BookingItem, BookingService, Service } from "../lib/databases.js";
 import { v4 as uuidv4 } from "uuid";
 
-/**
- * Crear una reserva (Booking) con items y servicios
- */
+
 export const createBooking = async (req, res) => {
   try {
-    const user_id = req.user?.id; // ✅ viene del middleware corregido
+    const user_id = req.user?.id; 
     if (!user_id) {
       console.error("❌ [POST /bookings] Usuario sin ID en req.user:", req.user);
       return res.status(401).json({ error: "Unauthorized" });
@@ -20,10 +18,10 @@ export const createBooking = async (req, res) => {
       return res.status(400).json({ error: "Campos obligatorios faltantes" });
     }
 
-    // 🔹 Crear Booking principal
+
     const booking = await Booking.create({
       id: uuidv4(),
-      customer_user_id: user_id, // ✅ campo correcto
+      customer_user_id: user_id, 
       start_date,
       end_date,
       status: "PENDING",
@@ -46,7 +44,7 @@ export const createBooking = async (req, res) => {
 
     console.log("✅ BookingItem creado:", item.id);
 
-    // 🔹 Crear servicios asociados (si los hay)
+  
     for (const sid of services) {
       await BookingService.create({
         id: uuidv4(),
@@ -67,7 +65,7 @@ export const createBooking = async (req, res) => {
 };
 
 /**
- * Listar reservas del usuario autenticado
+ * Listar reservas del usuario 
  */
 export const listMyBookings = async (req, res) => {
   try {
@@ -80,7 +78,7 @@ export const listMyBookings = async (req, res) => {
     console.log("🟢 [GET /bookings/my] Listando reservas para usuario:", user_id);
 
     const rows = await Booking.findAll({
-      where: { customer_user_id: user_id }, // ✅ Campo correcto
+      where: { customer_user_id: user_id }, 
       include: [
         {
           model: BookingItem,
