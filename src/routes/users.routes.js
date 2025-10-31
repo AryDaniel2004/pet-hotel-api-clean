@@ -12,7 +12,7 @@ import { requireAuth, requireRoles } from "../middlewares/authz.js";
 
 const router = Router();
 
-/* Middleware de validación */
+
 const validate = (rules) => [
   ...rules,
   (req, res, next) => {
@@ -24,7 +24,7 @@ const validate = (rules) => [
   },
 ];
 
-/* === Rutas === */
+// rUTAS 
 router.get("/", requireAuth, requireRoles(), list);
 
 router.post(
